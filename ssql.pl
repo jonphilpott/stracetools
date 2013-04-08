@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 # Script to convert various strace outputs into a sqlite3 database
+# preferered usage: strace -Tttt -f foo
+# or: strace -Tttt -f -p $PID
+
+
+
 
 use strict;
 use DBI;
