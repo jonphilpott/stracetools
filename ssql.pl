@@ -45,12 +45,15 @@ sub parse1 {
 sub parse2 {
     $_ = $_[0];
 
+    # regular return. 
     if (/^(\w+)\((.+)?= (.+) <([0-9.]+)>$/) {
         return  ($1, $1."(".strip($2), $3, $4);
     }
+    # sometimes the call doesn't have a duration.
     elsif (/^(\w+)\((.+)?= (.+)$/) {
         return  ($1, $1."(".strip($2), $3, "");
     }
+    # don't know what this is, log the line.
     else {
         return ("", $_, "", "");
     }
@@ -77,8 +80,6 @@ sub main {
     my $dbh = shift;
 
     my $sth = $dbh->prepare("INSERT INTO strace (pid, start, mili, syscall, full, ret, dur) VALUES (?, ?, ?, ?, ?, ?, ?);");
-    $sth->execute();
-
     my $n = 0;
     while (<STDIN>) {
         chomp;
