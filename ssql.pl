@@ -26,19 +26,19 @@ sub strip {
 sub parse1 {
     $_ = $_[0];
     # case 1 - strace output to file. with -f
-    if (/^(\d+) (\d\d:\d\d:\d\d).(\d+) (.+)/) {
+    if (/^(\d+) (\d+).(\d+) (.+)/) {
         return ($1, $2, $3, $4);
     }
     # case 2 - strace to stdout with -f and a child pid.
-    elsif (/^\[pid (\d+)\] (\d\d:\d\d:\d\d).(\d+) (.+)/) {
+    elsif (/^\[pid (\d+)\] (\d+).(\d+) (.+)/) {
         return ($1, $2, $3, $4);
     }
     # case 3 strace to stdout with parent pid or not -f
-    elsif (/^(\d\d:\d\d:\d\d).(\d+) (.+)/) {
+    elsif (/^(\d+).(\d+) (.+)/) {
         return ('parent', $1, $2, $3);
     }
     else {
-        warn "Unrecognised input - are you running strace with -Ttt?";
+        warn "Unrecognised input - are you running strace with -Tttt?";
     }
 }
 
@@ -47,6 +47,9 @@ sub parse2 {
 
     if (/^(\w+)\((.+)?= (.+) <([0-9.]+)>$/) {
         return  ($1, $1."(".strip($2), $3, $4);
+    }
+    elsif (/^(\w+)\((.+)?= (.+)$/) {
+        return  ($1, $1."(".strip($2), $3, "");
     }
     else {
         return ("", $_, "", "");
