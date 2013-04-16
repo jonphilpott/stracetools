@@ -146,8 +146,11 @@ sub main {
             while(<$sfh>) {
                 chomp;
                 /^(.+):\s+(.+)/;
-                $info{$1} = $2
-                  if (exists $WANT_FIELDS{$1});
+		my $key = $1;
+		my $value = $2;
+		$value =~ s/\t/ /g;
+                $info{$key} = $value 
+                  if (exists $WANT_FIELDS{$key});
             }
             close($sfh);
             
