@@ -145,7 +145,7 @@ sub main {
             
             while(<$sfh>) {
                 chomp;
-                /^(.+):\s+(\w+)/;
+                /^(.+):\s+(.+)/;
                 $info{$1} = $2
                   if (exists $WANT_FIELDS{$1});
             }
