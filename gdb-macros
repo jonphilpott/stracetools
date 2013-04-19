@@ -1,0 +1,11 @@
+define run_perl
+	set $sv = Perl_eval_pv(PL_curinterp, $arg0, 1)
+	printf "%s\n", *(char **)((void *)$sv + 12)
+end
+
+define perl_stack_trace
+	run_perl("{use Carp; Carp::longmess()}")
+end
+
+
+
