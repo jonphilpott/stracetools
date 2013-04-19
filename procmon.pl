@@ -53,8 +53,6 @@ my %WANT_FIELDS =
   (Name    => 1,
    State   => 1,
    Pid     => 1,
-   Uid     => 1,
-   Gid     => 1,
    VmSize  => 1,
    VmPeak  => 1,
    VmRSS   => 1,
@@ -84,8 +82,6 @@ CREATE TABLE ps
  start    time,
  name     varchar(32),
  state    varchar(1),
- uid      integer,
- gid      integer,
  vmsize   integer,
  vmpeak   integer,
  vmrss    integer,
@@ -106,7 +102,7 @@ sub prepare_insert {
     my ($dbh) = @_;
 
     $insert_handle = $dbh->prepare(<<'INSERT_QUERY');
-INSERT INTO ps (pid, start, name, state, uid, gid, vmsize, vmpeak, vmrss, vmdata, vmstk, vmexe, vmlib, vmswap, threads, wchan)
+INSERT INTO ps (pid, start, name, state, vmsize, vmpeak, vmrss, vmdata, vmstk, vmexe, vmlib, vmswap, threads, wchan)
 VALUES  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 INSERT_QUERY
 
@@ -117,7 +113,7 @@ INSERT_QUERY
 sub insert_row {
     my ($sth, $info) = @_;
 
-    $sth->execute(@{$info}{qw(Pid Time Name State Uid Gid 
+    $sth->execute(@{$info}{qw(Pid Time Name State 
                               VmSize VmPeak VmRSS VmData VmStk VmExe VmLib VmSwap 
                               Threads Wchan)});
 
@@ -125,7 +121,7 @@ sub insert_row {
 
 sub csv_output {
     my ($info) = @_;
-    print join(",", @{ $info }{qw(Time Pid Name State Uid Gid VmSize VmPeak Threads Wchan)}), "\n";
+    print join(",", @{ $info }{qw(Time Pid Name State VmSize VmPeak Threads Wchan)}), "\n";
 }
 
 sub main {
@@ -133,36 +129,42 @@ sub main {
 
     while (1) {
         opendir(my $dh, "/proc") || die "Couldn't open /proc $!";
-        
+
         while (readdir $dh) {
             next unless /^\d+$/; # only pids please.
             my $pid = $_;
-            
+
             open(my $sfh, join("/", "/proc", $pid, "status")) || next;
             my %info = (
                 Time => time,
                );
-            
+
             while(<$sfh>) {
                 chomp;
                 /^(.+):\s+(.+)/;
 		my $key = $1;
 		my $value = $2;
 		$value =~ s/\t/ /g;
-                $info{$key} = $value 
+
+                # Only save first value of State
+                if ($key eq "State") {
+                    $value = substr($value, 0, 1);
+                }
+
+                $info{$key} = $value
                   if (exists $WANT_FIELDS{$key});
             }
             close($sfh);
-            
+
             open(my $wfh, join("/", "/proc", $pid, "wchan")) || next;
             $info{Wchan} = <$wfh>;
             close($wfh);
-            
+
             if (!$TRIGGER_MODE || ($TRIGGER_MODE && $TRIGGER_STATE eq $info{State})) {
                 &{ $output }(\%info);
             }
         }
-        
+
         close($dh);
         sleep $INTERVAL_TIME;
     }
@@ -174,7 +176,7 @@ if ($OUTPUT_MODE) {
     create_table($dbh);
 
     my $prepare_handle = prepare_insert($dbh);
-    
+
     # commit signal handler
     $SIG{'INT'} = sub {
         $dbh->commit;
