@@ -1,3 +1,8 @@
+define ancient_run_perl
+	set $sv = Perl_eval_pv($arg0, 1)
+	printf "%s\n", **$sv
+end
+
 define run_perl
 	set $sv = Perl_eval_pv(PL_curinterp, $arg0, 1)
 	printf "%s\n", *(char **)((void *)$sv + 12)

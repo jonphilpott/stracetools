@@ -103,7 +103,7 @@ sub prepare_insert {
 
     $insert_handle = $dbh->prepare(<<'INSERT_QUERY');
 INSERT INTO ps (pid, start, name, state, vmsize, vmpeak, vmrss, vmdata, vmstk, vmexe, vmlib, vmswap, threads, wchan)
-VALUES  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+VALUES  (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 INSERT_QUERY
 
     return $insert_handle;
