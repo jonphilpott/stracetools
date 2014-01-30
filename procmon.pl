@@ -130,9 +130,8 @@ sub main {
     while (1) {
         opendir(my $dh, "/proc") || die "Couldn't open /proc $!";
 
-        while (readdir $dh) {
-            next unless /^\d+$/; # only pids please.
-            my $pid = $_;
+        while (my $pid = readdir $dh) {
+            next unless $pid =~ /^\d+$/; # only pids please.
 
             open(my $sfh, join("/", "/proc", $pid, "status")) || next;
             my %info = (
