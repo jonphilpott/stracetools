@@ -51,11 +51,11 @@ sub parse2 {
     }
     # sometimes the call doesn't have a duration.
     elsif (/^(\w+)\((.+)?= (.+)$/) {
-        return  ($1, $1."(".strip($2), $3, "");
+        return  ($1, $1."(".strip($2), $3, "?");
     }
     # don't know what this is, log the line.
     else {
-        return ("", $_, "", "");
+        return ("", $_, "", "?");
     }
 }
 
