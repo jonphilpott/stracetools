@@ -11,6 +11,7 @@ use strict;
 use POSIX qw(strftime);
 use DBI;
 use Getopt::Long;
+use Time::HiRes qw(usleep);
 
 
 my $TRIGGER_MODE = 0;
@@ -165,7 +166,7 @@ sub main {
         }
 
         close($dh);
-        sleep $INTERVAL_TIME;
+        usleep($INTERVAL_TIME * 1_000_000);
     }
 }
 
